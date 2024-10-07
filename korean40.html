@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隨機顯示韓文字母</title>
+    <style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    #letter {
+        font-size: 5em;
+    }
+
+    #translation {
+        font-size: 2em;
+        margin-top: 10px;
+    }
+
+    #pronunciation {
+        font-size: 0.625em;
+        vertical-align: super;
+        margin-left: 0.1em;
+    }
+
+    #startBtn, #pauseBtn {
+        font-size: 1.5em;
+        padding: 10px 20px;
+        margin-top: 20px;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <div id="letter">ㅏ</div>
+        <div id="pronunciation"></div>
+        <div id="translation"></div>
+        <button id="startBtn">開始</button>
+        <button id="pauseBtn" style="display:none;">暫停</button>
+    </div>
+    <script>
+    // 定義韓文字母、例子和翻譯
+    const letters = [
+        { letter: 'ㅏ', exam: '아파', translation: '痛', pronunciation: 'a' },
+        { letter: 'ㅏ', exam: '아기', translation: '孩子', pronunciation: 'a' },
+
+        { letter: 'ㅓ', exam: '어머', translation: '驚訝', pronunciation: 'ㄛ' },
+        { letter: 'ㅓ', exam: '어머니', translation: '媽嗎', pronunciation: 'ㄛ' },
+
+        { letter: 'ㅗ', exam: '오빠', translation: '哥哥', pronunciation: 'ㄡ' },
+        { letter: 'ㅗ', exam: '오이', translation: '小黃瓜', pronunciation: 'ㄡ' },
+
+        { letter: 'ㅜ', exam: '우유', translation: '牛奶', pronunciation: 'ㄨˋ' },
+        { letter: 'ㅜ', exam: '우정', translation: '友情', pronunciation: 'ㄨˋ' },
+
+        { letter: 'ㅐ', exam: '애기', translation: '嬰兒', pronunciation: 'ㄟ' },
+        { letter: 'ㅐ', exam: '애국', translation: '愛國', pronunciation: 'ㄟ' },
+
+        { letter: 'ㅔ', exam: '에어컨', translation: '冷氣', pronunciation: 'ㄝ' },
+        { letter: 'ㅔ', exam: '에너지', translation: '活力', pronunciation: 'ㄝ' },
+
+        { letter: 'ㅡ', exam: '으악', translation: '驚嚇', pronunciation: 'ㄜ' },
+        { letter: 'ㅡ', exam: '으뜸', translation: '最高', pronunciation: 'ㄜ' },
+
+        { letter: 'ㅣ', exam: '이상해', translation: '好奇怪', pronunciation: 'i' },
+        { letter: 'ㅣ', exam: '이름', translation: '名字', pronunciation: 'i' },
+
+
+        // { letter: 'ㅂ', exam: '두부', translation: '豆腐', pronunciation: 'ㄆ/ㄅ' },
+        // { letter: 'ㄷ', exam: '구두', translation: '皮鞋', pronunciation: 'ㄊ/ㄉ' },
+        // { letter: 'ㄱ', exam: '가구', translation: '傢俱', pronunciation: 'g/k' },
+        // { letter: 'ㅅ', exam: '자신', translation: '自己', pronunciation: 'ㄎ/ㄍ' },
+        // { letter: 'ㅈ', exam: '부자', translation: '富人', pronunciation: 'ㄘ/ㄗ/ㄐ' },
+        // { letter: 'ㅁ', exam: '마음', translation: '心', pronunciation: 'ㄇ' },
+        // { letter: 'ㅇ', exam: '아기', translation: '嬰兒', pronunciation: 'ng' },
+        // { letter: 'ㄹ', exam: '라면', translation: '拉麵', pronunciation: 'ㄌ' },
+        // { letter: 'ㅑ', exam: '야호', translation: '歡呼聲', pronunciation: 'ya' },
+        // { letter: 'ㅕ', exam: '여보', translation: '親愛的', pronunciation: 'yeo' },
+        // { letter: 'ㅛ', exam: '요괴', translation: '妖怪', pronunciation: 'yo' },
+        // { letter: 'ㅠ', exam: '우유', translation: '牛奶', pronunciation: 'yu' },
+        // { letter: 'ㅠ', exam: '유자', translation: '柚子', pronunciation: 'yu' },
+        // { letter: 'ㅒ', exam: '얘기', translation: '聊天', pronunciation: 'yae' },
+        // { letter: 'ㅖ', exam: '예술', translation: '藝術', pronunciation: 'ye' },
+        // { letter: 'ㅘ', exam: '와우', translation: '哇', pronunciation: 'wa' },
+        // { letter: 'ㅙ', exam: '왜요', translation: '為什麼', pronunciation: 'wae' },
+        // { letter: 'ㅚ', exam: '외국인', translation: '外國人', pronunciation: 'oe' },
+        // { letter: 'ㅝ', exam: '워너원', translation: '韓團', pronunciation: 'wo' },
+        // { letter: 'ㅞ', exam: '웨이터', translation: '服務生', pronunciation: 'we' },
+        // { letter: 'ㅟ', exam: '위아래', translation: '上下', pronunciation: 'wi' },
+        // { letter: 'ㅢ', exam: '의사', translation: '醫生', pronunciation: 'ui' },
+        // { letter: 'ㄲ', exam: '까치', translation: '喜鵲', pronunciation: 'gg' },
+        // { letter: 'ㄴ', exam: '나무', translation: '樹', pronunciation: 'n' },
+        // { letter: 'ㄸ', exam: '또', translation: '再', pronunciation: 'tt' },
+        // { letter: 'ㅃ', exam: '빨간', translation: '紅色的', pronunciation: 'bb' },
+        // { letter: 'ㅆ', exam: '씨앗', translation: '種子', pronunciation: 'ss' },
+        // { letter: 'ㅊ', exam: '자전거', translation: '自行車', pronunciation: 'j' },
+        // { letter: 'ㅉ', exam: '짜장면', translation: '炸醬麵', pronunciation: 'jj' },
+        // { letter: 'ㅋ', exam: '커피', translation: '咖啡', pronunciation: 'k' },
+        // { letter: 'ㅌ', exam: '타다', translation: '乘坐', pronunciation: 't' },
+        // { letter: 'ㅍ', exam: '파란', translation: '藍色的', pronunciation: 'p' },
+        // { letter: 'ㅎ', exam: '하늘', translation: '天空', pronunciation: 'h' },
+    ];
+
+    let intervalId; // 保存 setInterval 的 ID
+    let isPaused = false; // 暫停狀態
+
+    function generateRandomLetter() {
+        if (isPaused) return; // 如果暫停狀態，跳過更新
+
+        const randomIndex = Math.floor(Math.random() * letters.length);
+        const randomLetter = letters[randomIndex];
+
+        // 更新韓文字母
+        document.getElementById('letter').textContent = randomLetter.letter;
+        // 更新翻譯，顯示 exam 的內容
+        document.getElementById('translation').textContent = randomLetter.exam + ' (' + randomLetter.translation + ')';
+        document.getElementById('pronunciation').textContent = randomLetter.pronunciation;
+
+        // 使用 Chrome 語音合成朗讀字母和例子
+        const utterance1 = new SpeechSynthesisUtterance(randomLetter.letter);
+        const utterance2 = new SpeechSynthesisUtterance(randomLetter.exam);
+        utterance1.lang = 'ko-KR'; // 設定語言為韓語
+        utterance2.lang = 'ko-KR'; // 設定語言為韓語
+
+        // 先播放 letter，再播放 exam
+        speechSynthesis.speak(utterance1);
+
+        speechSynthesis.speak(utterance2);
+    }
+
+    // 用戶點擊開始按鈕後啟動自動字母顯示和語音播放
+    document.getElementById('startBtn').addEventListener('click', function() {
+        // 隱藏開始按鈕，顯示暫停按鈕
+        this.style.display = 'none';
+        document.getElementById('pauseBtn').style.display = 'inline-block';
+
+        // 立刻生成一次字母和翻譯
+        generateRandomLetter();
+
+        // 每 1.5 秒自動生成
+        intervalId = setInterval(generateRandomLetter, 4500);
+    });
+
+    // 暫停或繼續按鈕的功能
+    document.getElementById('pauseBtn').addEventListener('click', function() {
+        if (isPaused) {
+            // 如果已暫停，恢復並更新按鈕文字
+            isPaused = false;
+            this.textContent = '暫停';
+        } else {
+            // 如果未暫停，設置為暫停狀態並更新按鈕文字
+            isPaused = true;
+            this.textContent = '繼續';
+        }
+    });
+    </script>
+</body>
+
+</html>
+<!-- 
+https://kpop2013.pixnet.net/blog/post/402928594
+https://kpop2013.pixnet.net/blog/post/402944389
+ -->
